@@ -7,6 +7,20 @@ defmodule AshPaperTrail.Resource do
   Documentation for `AshPaperTrail.Resource`.
   """
 
+  @store_actor_information %Spark.Dsl.Entity{
+    name: :store_actor_information,
+    describe: """
+    Creates a jsonb attribute on the version resource, which stores the given actor fields.
+    """,
+    examples: [
+      "store_actor_information [:id, :email], :actor_information, MyApp.Users.User"
+    ],
+    no_depend_modules: [:destination],
+    target: AshPaperTrail.Resource.StoreActorInformation,
+    args: [:attributes, :name, :destination],
+    schema: AshPaperTrail.Resource.StoreActorInformation.schema()
+  }
+
   @belongs_to_actor %Spark.Dsl.Entity{
     name: :belongs_to_actor,
     describe: """
@@ -53,7 +67,7 @@ defmodule AshPaperTrail.Resource do
     describe: """
     A section for configuring how versioning is derived for the resource.
     """,
-    entities: [@belongs_to_actor, @metadata],
+    entities: [@belongs_to_actor, @metadata, @store_actor_information],
     schema: [
       primary_key_type: [
         type: :atom,
