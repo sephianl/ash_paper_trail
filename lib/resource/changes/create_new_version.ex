@@ -36,15 +36,22 @@ defmodule AshPaperTrail.Resource.Changes.CreateNewVersion do
   @impl true
   def after_batch([], _, _), do: []
 
-  def after_batch([{changeset, _} | _] = changesets_and_results, _opts, _context) do
-    if valid_for_tracking?(changeset) do
+  def after_batch([{_changeset, _} | _] = changesets_and_results, _opts, _context) do
+    # Find the first non-nil changeset to determine if tracking is valid  
+    first_changeset =
+      Enum.find_value(changesets_and_results, fn
+        {%Ash.Changeset{} = cs, _} -> cs
+        _ -> nil
+      end)
+
+    if first_changeset && valid_for_tracking?(first_changeset) do
       inputs = bulk_build_notifications(changesets_and_results)
 
       if Enum.any?(inputs) do
-        version_resource = AshPaperTrail.Resource.Info.version_resource(changeset.resource)
+        version_resource = AshPaperTrail.Resource.Info.version_resource(first_changeset.resource)
         version_changeset = Ash.Changeset.new(version_resource)
-        actor = changeset.context[:private][:actor]
-        bulk_create!(changeset, version_changeset, inputs, actor)
+        actor = first_changeset.context[:private][:actor]
+        bulk_create!(first_changeset, version_changeset, inputs, actor)
       end
     end
 
