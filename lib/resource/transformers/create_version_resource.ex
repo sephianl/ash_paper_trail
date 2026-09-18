@@ -64,7 +64,7 @@ defmodule AshPaperTrail.Resource.Transformers.CreateVersionResource do
       cond do
         data_layer == AshPostgres.DataLayer ->
           {true, false, apply(AshPostgres, :table, [dsl_state]),
-           apply(AshPostgres, :repo, [dsl_state])}
+           Spark.Dsl.Extension.get_opt(dsl_state, [:postgres], :repo, nil, true)}
 
         data_layer == AshSqlite.DataLayer ->
           {false, true, apply(AshSqlite.DataLayer.Info, :table, [dsl_state]),
